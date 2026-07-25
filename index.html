@@ -1,0 +1,570 @@
+<title>Tres en Raya — Pizarra</title>
+<meta name="description" content="Tres en raya de tiza sobre una pizarra de madera, para jugar entre dos personas." />
+<style>
+  :root{
+    --chalkboard: #2f4239;
+    --chalkboard-deep: #253530;
+    --wood: #5b4230;
+    --wood-light: #7d5c3e;
+    --wood-dark: #3a2b1e;
+    --chalk-white: #f2efe6;
+    --chalk-coral: #e2836a;
+    --chalk-yellow: #e6c46a;
+    --chalk-dust: rgba(242,239,230,.05);
+    --ink-shadow: rgba(0,0,0,.4);
+    --focus-ring: #e6c46a;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background:
+      radial-gradient(120% 90% at 50% 0%, #33453c 0%, #1c2b25 60%, #141f1a 100%);
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    color: var(--chalk-white);
+  }
+
+  .frame{
+    width: min(92vw, 460px);
+    padding: 14px 14px 20px;
+    border-radius: 14px;
+    background:
+      repeating-linear-gradient(115deg, var(--wood-light) 0 3px, var(--wood) 3px 7px),
+      linear-gradient(160deg, var(--wood-light), var(--wood-dark));
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.08) inset,
+      0 30px 50px -20px var(--ink-shadow),
+      0 2px 8px rgba(0,0,0,.5);
+  }
+
+  .board-panel{
+    position: relative;
+    border-radius: 6px;
+    padding: 1.4rem 1.2rem 1rem;
+    background:
+      radial-gradient(140% 100% at 50% -10%, var(--chalkboard) 0%, var(--chalkboard-deep) 75%);
+    box-shadow:
+      inset 0 0 0 1px rgba(0,0,0,.25),
+      inset 0 10px 30px rgba(0,0,0,.35),
+      inset 0 -6px 18px rgba(0,0,0,.3);
+    overflow: hidden;
+  }
+
+  .board-panel::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(var(--chalk-dust) 1px, transparent 1px),
+      radial-gradient(var(--chalk-dust) 1px, transparent 1px);
+    background-size: 7px 7px, 11px 11px;
+    background-position: 0 0, 4px 5px;
+    opacity:.6;
+    pointer-events:none;
+  }
+
+  header{ position: relative; text-align:center; margin-bottom: .6rem; }
+
+  h1{
+    margin: 0 0 .1rem;
+    font-size: clamp(1.6rem, 7vw, 2.15rem);
+    line-height: 1.1;
+    letter-spacing: .01em;
+    text-wrap: balance;
+    font-family: "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", cursive;
+    font-weight: 400;
+    color: var(--chalk-white);
+    text-shadow: 0 0 1px rgba(242,239,230,.5), 0 2px 6px rgba(0,0,0,.25);
+  }
+  h1 span{ display:inline-block; }
+
+  .subtitle{
+    margin: 0;
+    font-size: .8rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--chalk-yellow);
+    opacity: .75;
+  }
+
+  .scoreboard{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: .5rem;
+    margin: .9rem 0 1rem;
+  }
+  .score{
+    flex: 1;
+    text-align: center;
+    padding: .5rem .25rem .45rem;
+    border-radius: 8px;
+    background: rgba(255,255,255,.03);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08);
+  }
+  .score .mark{
+    font-family: "Segoe Print", "Bradley Hand", "Chalkboard SE", cursive;
+    font-size: 1.15rem;
+    display:block;
+  }
+  .score.x .mark{ color: var(--chalk-coral); }
+  .score.o .mark{ color: var(--chalk-yellow); }
+  .score.d .mark{ color: var(--chalk-white); opacity:.75; }
+  .score .tally{
+    display:block;
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .02em;
+    margin-top: .1rem;
+  }
+  .score .label{
+    display:block;
+    font-size: .58rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    opacity:.55;
+    margin-top: .15rem;
+  }
+
+  .board-wrap{
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    margin: 0 auto;
+    touch-action: manipulation;
+  }
+  canvas{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    display:block;
+  }
+  .cells{
+    position:absolute; inset:0;
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    grid-template-rows: repeat(3,1fr);
+  }
+  .cells button{
+    appearance:none;
+    background:transparent;
+    border:none;
+    margin:0; padding:0;
+    cursor:pointer;
+  }
+  .cells button:disabled{ cursor:default; }
+  .cells button:focus-visible{
+    outline: 3px solid var(--focus-ring);
+    outline-offset: -6px;
+    border-radius: 6px;
+  }
+
+  .status{
+    text-align:center;
+    min-height: 1.6em;
+    margin: .85rem 0 .2rem;
+    font-family: "Segoe Print", "Bradley Hand", "Chalkboard SE", cursive;
+    font-size: 1.05rem;
+    color: var(--chalk-white);
+  }
+
+  .controls{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    gap: .55rem;
+    margin-top: .6rem;
+  }
+
+  .eraser{
+    position: relative;
+    display:flex;
+    align-items:center;
+    gap: .55rem;
+    padding: .5rem 1.1rem .5rem .7rem;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    font-size: .85rem;
+    letter-spacing: .03em;
+    color: #2a1d13;
+    background: linear-gradient(180deg, #f2efe6 0 45%, #d8d2c2 45% 100%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,.6) inset,
+      0 3px 0 #9a917c,
+      0 6px 10px rgba(0,0,0,.35);
+    transform: translateY(0);
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .eraser::before{
+    content:"";
+    width: 22px; height: 14px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #c76a52, #a4482f);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.15);
+  }
+  .eraser:active{
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 rgba(255,255,255,.5) inset, 0 0 0 #9a917c, 0 2px 4px rgba(0,0,0,.3);
+  }
+  .eraser:focus-visible{ outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+  .reset-scores{
+    background: none; border: none;
+    color: var(--chalk-white);
+    opacity: .5;
+    font-size: .72rem;
+    letter-spacing: .04em;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: .2rem;
+  }
+  .reset-scores:hover{ opacity: .8; }
+  .reset-scores:focus-visible{ outline: 2px solid var(--focus-ring); outline-offset: 2px; opacity:.9; }
+
+  .tray{
+    display:flex;
+    justify-content:center;
+    gap: 10px;
+    margin-top: 1rem;
+    opacity: .85;
+  }
+  .chalk{
+    width: 26px; height: 9px;
+    border-radius: 3px;
+    box-shadow: 0 2px 3px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .chalk.c1{ background: var(--chalk-coral); }
+  .chalk.c2{ background: var(--chalk-yellow); }
+  .chalk.c3{ background: var(--chalk-white); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+  }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px;
+    padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+</style>
+
+<div class="frame">
+  <div class="board-panel">
+    <header>
+      <h1 id="title">Tres en Raya</h1>
+      <p class="subtitle">Tiza sobre pizarra · dos jugadores</p>
+    </header>
+
+    <div class="scoreboard" aria-hidden="false">
+      <div class="score x">
+        <span class="mark">X</span>
+        <span class="tally" id="scoreX">0</span>
+        <span class="label">Gana</span>
+      </div>
+      <div class="score d">
+        <span class="mark">=</span>
+        <span class="tally" id="scoreD">0</span>
+        <span class="label">Empates</span>
+      </div>
+      <div class="score o">
+        <span class="mark">O</span>
+        <span class="tally" id="scoreO">0</span>
+        <span class="label">Gana</span>
+      </div>
+    </div>
+
+    <div class="board-wrap">
+      <canvas id="board" width="600" height="600"></canvas>
+      <div class="cells" id="cells" role="group" aria-label="Tablero de tres en raya, 3 por 3">
+        <!-- 9 buttons injected by JS -->
+      </div>
+    </div>
+
+    <p class="status" id="status" role="status" aria-live="polite">Turno de X</p>
+
+    <div class="controls">
+      <button class="eraser" id="resetRound" type="button">Borrar pizarra</button>
+      <button class="reset-scores" id="resetScores" type="button">Reiniciar marcador</button>
+    </div>
+
+    <div class="tray" aria-hidden="true">
+      <div class="chalk c1"></div>
+      <div class="chalk c2"></div>
+      <div class="chalk c3"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var SIZE = 600, CELL = SIZE / 3;
+  var canvas = document.getElementById("board");
+  var ctx = canvas.getContext("2d");
+  var cellsWrap = document.getElementById("cells");
+  var statusEl = document.getElementById("status");
+  var titleEl = document.getElementById("title");
+
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // --- jittered chalk title lettering ---
+  (function jitterTitle(){
+    var text = titleEl.textContent;
+    var rot = [-4, 3, -2, 5, -3, 2, -5, 4, -2, 3, -4, 2];
+    titleEl.textContent = "";
+    for (var i = 0; i < text.length; i++){
+      var ch = text[i];
+      var span = document.createElement("span");
+      span.textContent = ch === " " ? " " : ch;
+      var r = rot[i % rot.length];
+      var dy = (i % 3 === 0) ? -2 : (i % 3 === 1 ? 1 : 0);
+      span.style.transform = "rotate(" + r + "deg) translateY(" + dy + "px)";
+      titleEl.appendChild(span);
+    }
+  })();
+
+  // --- game state ---
+  var board = Array(9).fill(null);
+  var current = "X";
+  var gameOver = false;
+  var scores = { X: 0, O: 0, D: 0 };
+
+  var SCORE_KEY = "tresenraya-scores-v1";
+  try {
+    var saved = JSON.parse(localStorage.getItem(SCORE_KEY) || "null");
+    if (saved && typeof saved.X === "number") scores = saved;
+  } catch (e) {}
+
+  var WINS = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+
+  function cellCenter(i){
+    var col = i % 3, row = Math.floor(i / 3);
+    return { x: col * CELL + CELL / 2, y: row * CELL + CELL / 2 };
+  }
+
+  // --- chalky drawing primitives ---
+  function chalkLine(x1, y1, x2, y2, color, width){
+    var dx = x2 - x1, dy = y2 - y1;
+    var len = Math.hypot(dx, dy);
+    var steps = Math.max(6, Math.floor(len / 8));
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineCap = "round";
+    for (var pass = 0; pass < 2; pass++){
+      ctx.globalAlpha = pass === 0 ? 0.92 : 0.32;
+      ctx.lineWidth = width * (pass === 0 ? 1 : 1.7);
+      ctx.beginPath();
+      var px = x1, py = y1;
+      for (var i = 1; i <= steps; i++){
+        var t = i / steps;
+        var nx = x1 + dx * t + (Math.random() - 0.5) * width * 0.7;
+        var ny = y1 + dy * t + (Math.random() - 0.5) * width * 0.7;
+        ctx.moveTo(px, py);
+        ctx.lineTo(nx, ny);
+        px = nx; py = ny;
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function chalkCircle(cx, cy, r, color, width){
+    var steps = 48;
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineCap = "round";
+    for (var pass = 0; pass < 2; pass++){
+      ctx.globalAlpha = pass === 0 ? 0.92 : 0.3;
+      ctx.lineWidth = width * (pass === 0 ? 1 : 1.7);
+      ctx.beginPath();
+      var prevX = null, prevY = null;
+      for (var i = 0; i <= steps; i++){
+        var a = (i / steps) * Math.PI * 2;
+        var rr = r + (Math.random() - 0.5) * width * 0.6;
+        var x = cx + Math.cos(a) * rr;
+        var y = cy + Math.sin(a) * rr;
+        if (prevX !== null){ ctx.moveTo(prevX, prevY); ctx.lineTo(x, y); }
+        prevX = x; prevY = y;
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawGrid(){
+    var white = "#f2efe6";
+    chalkLine(CELL, CELL * 0.12, CELL, SIZE - CELL * 0.12, white, 5);
+    chalkLine(CELL * 2, CELL * 0.12, CELL * 2, SIZE - CELL * 0.12, white, 5);
+    chalkLine(CELL * 0.12, CELL, SIZE - CELL * 0.12, CELL, white, 5);
+    chalkLine(CELL * 0.12, CELL * 2, SIZE - CELL * 0.12, CELL * 2, white, 5);
+  }
+
+  function drawMark(i, player){
+    var c = cellCenter(i);
+    var pad = CELL * 0.32;
+    if (player === "X"){
+      chalkLine(c.x - pad, c.y - pad, c.x + pad, c.y + pad, "#e2836a", 11);
+      chalkLine(c.x + pad, c.y - pad, c.x - pad, c.y + pad, "#e2836a", 11);
+    } else {
+      chalkCircle(c.x, c.y, pad, "#e6c46a", 11);
+    }
+  }
+
+  function drawWinLine(combo){
+    var a = cellCenter(combo[0]), b = cellCenter(combo[2]);
+    var dx = b.x - a.x, dy = b.y - a.y;
+    var len = Math.hypot(dx, dy);
+    var ext = 34;
+    var ux = dx / len, uy = dy / len;
+    ctx.save();
+    ctx.shadowColor = "rgba(230,196,106,.55)";
+    ctx.shadowBlur = 8;
+    chalkLine(a.x - ux * ext, a.y - uy * ext, b.x + ux * ext, b.y + uy * ext, "#f2efe6", 9);
+    ctx.restore();
+    if (!reduceMotion) dustPuff((a.x + b.x) / 2, (a.y + b.y) / 2);
+  }
+
+  function dustPuff(cx, cy){
+    var particles = [];
+    for (var i = 0; i < 18; i++){
+      particles.push({
+        x: cx, y: cy,
+        vx: (Math.random() - 0.5) * 3.2,
+        vy: (Math.random() - 0.5) * 3.2 - 0.6,
+        life: 1
+      });
+    }
+    var frame = 0;
+    (function tick(){
+      frame++;
+      ctx.save();
+      particles.forEach(function(p){
+        p.x += p.vx; p.y += p.vy; p.vy += 0.03; p.life -= 0.045;
+        if (p.life > 0){
+          ctx.globalAlpha = Math.max(p.life, 0) * 0.7;
+          ctx.fillStyle = "#f2efe6";
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      ctx.restore();
+      particles = particles.filter(function(p){ return p.life > 0; });
+      if (particles.length && frame < 60) requestAnimationFrame(tick);
+    })();
+  }
+
+  function fitCanvas(){
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = SIZE * dpr;
+    canvas.height = SIZE * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    redrawAll();
+  }
+
+  function redrawAll(){
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    drawGrid();
+    board.forEach(function(v, i){ if (v) drawMark(i, v); });
+  }
+
+  // --- accessible cell buttons overlaying the canvas ---
+  var buttons = [];
+  for (var i = 0; i < 9; i++){
+    (function(idx){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.setAttribute("aria-label", "Casilla " + (idx + 1) + ", vacía");
+      btn.addEventListener("click", function(){ playCell(idx); });
+      cellsWrap.appendChild(btn);
+      buttons.push(btn);
+    })(i);
+  }
+
+  function updateButton(i){
+    var v = board[i];
+    buttons[i].disabled = !!v || gameOver;
+    buttons[i].setAttribute("aria-label",
+      v ? "Casilla " + (i + 1) + ", ocupada por " + v : "Casilla " + (i + 1) + ", vacía");
+  }
+
+  function setStatus(text){ statusEl.textContent = text; }
+
+  function saveScores(){
+    try { localStorage.setItem(SCORE_KEY, JSON.stringify(scores)); } catch (e) {}
+  }
+
+  function renderScores(){
+    document.getElementById("scoreX").textContent = scores.X;
+    document.getElementById("scoreO").textContent = scores.O;
+    document.getElementById("scoreD").textContent = scores.D;
+  }
+
+  function playCell(i){
+    if (gameOver || board[i]) return;
+    board[i] = current;
+    drawMark(i, current);
+    updateButton(i);
+
+    var win = WINS.find(function(combo){
+      return combo.every(function(k){ return board[k] === current; });
+    });
+
+    if (win){
+      gameOver = true;
+      drawWinLine(win);
+      scores[current]++;
+      renderScores();
+      saveScores();
+      setStatus("¡" + current + " gana la partida!");
+      buttons.forEach(function(b){ b.disabled = true; });
+      return;
+    }
+
+    if (board.every(Boolean)){
+      gameOver = true;
+      scores.D++;
+      renderScores();
+      saveScores();
+      setStatus("Empate — pizarra llena");
+      return;
+    }
+
+    current = current === "X" ? "O" : "X";
+    setStatus("Turno de " + current);
+  }
+
+  function resetRound(){
+    board = Array(9).fill(null);
+    current = "X";
+    gameOver = false;
+    redrawAll();
+    buttons.forEach(function(b, i){ updateButton(i); });
+    setStatus("Turno de X");
+  }
+
+  document.getElementById("resetRound").addEventListener("click", resetRound);
+  document.getElementById("resetScores").addEventListener("click", function(){
+    scores = { X: 0, O: 0, D: 0 };
+    renderScores();
+    saveScores();
+  });
+
+  window.addEventListener("resize", fitCanvas);
+
+  renderScores();
+  fitCanvas();
+})();
+</script>
