@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OLEA — Cocina Mediterránea</title>
+<meta name="description" content="OLEA, restaurante de cocina mediterránea. Reserve su mesa, descubra la carta del día y conozca nuestro local." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg: #121110;
+    --bg-deep: #0b0a09;
+    --panel: #171614;
+    --line: rgba(201,163,92,.22);
+    --gold: #c9a35c;
+    --gold-soft: #a98a52;
+    --cream: #f4efe6;
+    --cream-dim: rgba(244,239,230,.62);
+    --cream-faint: rgba(244,239,230,.38);
+  }
+
+  *{ box-sizing: border-box; margin: 0; padding: 0; }
+
+  html{ scroll-behavior: smooth; }
+
+  body{
+    background: var(--bg);
+    color: var(--cream);
+    font-family: "Jost", "Segoe UI", system-ui, sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .brand{
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 500;
+    letter-spacing: .02em;
+  }
+
+  a{ color: inherit; text-decoration: none; }
+
+  img{ max-width: 100%; display: block; }
+
+  .container{
+    width: min(1080px, 92vw);
+    margin-inline: auto;
+  }
+
+  .eyebrow{
+    font-size: .72rem;
+    letter-spacing: .32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 50;
+    padding: 1.1rem 0;
+    background: linear-gradient(180deg, rgba(11,10,9,.92), rgba(11,10,9,0));
+    transition: background .3s ease, box-shadow .3s ease, backdrop-filter .3s ease;
+  }
+  header.scrolled{
+    background: rgba(11,10,9,.86);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 1px 0 var(--line);
+  }
+
+  .nav-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand{
+    font-size: 1.5rem;
+    letter-spacing: .18em;
+    color: var(--cream);
+  }
+  .brand span{ color: var(--gold); }
+
+  nav.links{
+    display: flex;
+    gap: 2.2rem;
+  }
+  nav.links a{
+    font-size: .82rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    position: relative;
+    padding-bottom: 4px;
+  }
+  nav.links a::after{
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform .35s ease;
+  }
+  nav.links a:hover{ color: var(--cream); }
+  nav.links a:hover::after{ transform: scaleX(1); transform-origin: left; }
+
+  .btn{
+    display: inline-block;
+    padding: .85rem 2.1rem;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    font-size: .78rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    transition: background .3s ease, color .3s ease;
+  }
+  .btn:hover{ background: var(--gold); color: var(--bg-deep); }
+  .btn.solid{
+    background: var(--gold);
+    color: var(--bg-deep);
+  }
+  .btn.solid:hover{ background: var(--gold-soft); border-color: var(--gold-soft); }
+
+  .nav-cta{ display: none; }
+  @media (min-width: 860px){ .nav-cta{ display: inline-block; } }
+
+  .menu-toggle{
+    display: inline-block;
+    font-size: .78rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: .6rem 1rem;
+  }
+  @media (min-width: 860px){ .menu-toggle{ display: none; } }
+  nav.links{ display: none; }
+  @media (min-width: 860px){ nav.links{ display: flex; } }
+
+  /* ---------- Progreso e hilo conductor ---------- */
+  .progress-bar{
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    width: 0%;
+    background: var(--gold);
+    z-index: 70;
+    transition: width .12s linear;
+  }
+
+  .side-nav{
+    display: none;
+    position: fixed;
+    right: 1.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 45;
+  }
+  @media (min-width: 1140px){ .side-nav{ display: block; } }
+  .side-nav .track{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.55rem;
+    padding: .4rem 0;
+  }
+  .side-nav .line, .side-nav .line-fill{
+    position: absolute;
+    left: 50%;
+    width: 1px;
+    top: 0; bottom: 0;
+    transform: translateX(-50%);
+  }
+  .side-nav .line{ background: var(--line); }
+  .side-nav .line-fill{ height: 0%; bottom: auto; background: var(--gold); transition: height .2s linear; }
+  .side-nav a{
+    position: relative;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--cream-faint);
+    transition: background .3s ease, transform .3s ease;
+  }
+  .side-nav a::after{
+    content: attr(data-label);
+    position: absolute;
+    right: 140%;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--cream-dim);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .side-nav a:hover{ background: var(--cream); }
+  .side-nav a:hover::after{ opacity: 1; }
+  .side-nav a.active{ background: var(--gold); transform: scale(1.5); }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 7rem 1.5rem 4rem;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero-bg{
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background-image: url("https://images.unsplash.com/photo-1687723547516-308ac9cefba9?auto=format&fit=crop&w=2000&q=80");
+    background-size: cover;
+    background-position: center 65%;
+    filter: sepia(.25) saturate(1.15) brightness(.55) contrast(1.05);
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(ellipse 80% 55% at 50% 0%, rgba(201,163,92,.14), transparent 65%),
+      linear-gradient(180deg, rgba(11,10,9,.55) 0%, var(--bg-deep) 88%);
+    pointer-events: none;
+  }
+
+  .hero .eyebrow{ margin-bottom: 1.4rem; }
+
+  .hero h1{
+    font-size: clamp(3rem, 9vw, 6.4rem);
+    line-height: .95;
+    letter-spacing: .05em;
+    color: var(--cream);
+  }
+  .hero h1 em{
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-rule{
+    width: 64px;
+    height: 1px;
+    background: var(--gold);
+    margin: 1.8rem auto;
+  }
+
+  .hero p{
+    max-width: 46ch;
+    color: var(--cream-dim);
+    font-size: 1.08rem;
+  }
+
+  .hero-actions{
+    margin-top: 2.6rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .scroll-hint{
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: .68rem;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: var(--cream-faint);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .6rem;
+  }
+  .scroll-hint::after{
+    content:"";
+    width: 1px; height: 34px;
+    background: linear-gradient(var(--gold), transparent);
+    animation: drip 1.8s ease-in-out infinite;
+  }
+  @keyframes drip{
+    0%{ opacity: 0; transform: scaleY(0); transform-origin: top; }
+    40%{ opacity: 1; transform: scaleY(1); transform-origin: top; }
+    100%{ opacity: 0; transform: scaleY(1); transform-origin: bottom; }
+  }
+
+  /* ---------- Section shell ---------- */
+  section{
+    padding: 7rem 0;
+    position: relative;
+  }
+  section.alt{ background: var(--panel); }
+
+  .section-head{
+    text-align: center;
+    max-width: 56ch;
+    margin: 0 auto 3.8rem;
+  }
+  .section-head h2{
+    font-size: clamp(2.1rem, 4.4vw, 3rem);
+    margin: .9rem 0 1.1rem;
+  }
+  .section-head p{ color: var(--cream-dim); }
+
+  .fade-in{
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  .fade-in.visible{
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---------- Nosotros ---------- */
+  .about-grid{
+    display: grid;
+    gap: 3.5rem;
+    align-items: center;
+  }
+  @media (min-width: 860px){
+    .about-grid{ grid-template-columns: .9fr 1.1fr; gap: 5rem; }
+  }
+
+  .about-visual{
+    aspect-ratio: 4 / 5;
+    border: 1px solid var(--line);
+    padding: 1.1rem;
+  }
+  .about-visual-inner{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .about-visual-inner img{
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    filter: sepia(.2) saturate(1.1) brightness(.8) contrast(1.05);
+  }
+  .about-visual-inner::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 90% at 30% 10%, rgba(201,163,92,.18), transparent 60%);
+    pointer-events: none;
+  }
+  .about-visual-inner .visual-tag{
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 1.4rem 1.2rem;
+    background: linear-gradient(0deg, rgba(11,10,9,.85), transparent);
+    font-family: "Cormorant Garamond", serif;
+    letter-spacing: .3em;
+    font-size: 1.3rem;
+    color: rgba(244,239,230,.85);
+  }
+
+  .about-text p + p{ margin-top: 1.2rem; }
+  .about-text p{ color: var(--cream-dim); }
+
+  .stats{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 2.6rem;
+    padding-top: 2.2rem;
+    border-top: 1px solid var(--line);
+  }
+  .stats div h3{ color: var(--gold); font-size: 2rem; }
+  .stats div span{
+    display: block;
+    font-size: .72rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--cream-faint);
+    margin-top: .3rem;
+  }
+
+  /* ---------- Galería ---------- */
+  .gallery{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  @media (min-width: 760px){
+    .gallery{ grid-template-columns: repeat(4, 1fr); }
+    .gallery figure:first-child{ grid-row: span 2; }
+  }
+  .gallery figure{
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+  }
+  .gallery figure:first-child{ aspect-ratio: 3 / 4; }
+  @media (min-width: 760px){ .gallery figure:first-child{ aspect-ratio: unset; } }
+  .gallery img{
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    filter: sepia(.18) saturate(1.15) brightness(.82) contrast(1.05);
+    transition: transform .6s ease, filter .6s ease;
+  }
+  .gallery figure:hover img{
+    transform: scale(1.06);
+    filter: sepia(.05) saturate(1.15) brightness(.92) contrast(1.05);
+  }
+  .gallery figcaption{
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 1rem;
+    font-size: .74rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--cream);
+    background: linear-gradient(0deg, rgba(11,10,9,.85), transparent);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .35s ease, transform .35s ease;
+  }
+  .gallery figure:hover figcaption{ opacity: 1; transform: translateY(0); }
+
+  /* ---------- Carta ---------- */
+  .menu-tabs{
+    display: flex;
+    justify-content: center;
+    gap: .6rem;
+    margin-bottom: 3.2rem;
+    flex-wrap: wrap;
+  }
+  .menu-tab{
+    padding: .6rem 1.4rem;
+    font-size: .76rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+    border: 1px solid transparent;
+    cursor: pointer;
+    background: none;
+    font-family: inherit;
+  }
+  .menu-tab.active{
+    color: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .menu-panel{ display: none; }
+  .menu-panel.active{ display: block; }
+
+  .menu-list{ max-width: 720px; margin: 0 auto; display: grid; gap: 2rem; }
+  .menu-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+  .menu-item-name{
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.32rem;
+    color: var(--cream);
+  }
+  .menu-item-desc{
+    font-size: .88rem;
+    color: var(--cream-faint);
+    margin-top: .25rem;
+    max-width: 44ch;
+  }
+  .menu-item-price{
+    font-family: "Cormorant Garamond", serif;
+    color: var(--gold);
+    font-size: 1.15rem;
+    white-space: nowrap;
+  }
+  .menu-dots{
+    flex: 1;
+    border-bottom: 1px dotted var(--line);
+    margin: 0 .6rem .45rem;
+    display: none;
+  }
+  @media (min-width: 640px){ .menu-dots{ display: block; } }
+
+  .menu-note{
+    text-align: center;
+    margin-top: 3rem;
+    font-size: .82rem;
+    color: var(--cream-faint);
+    font-style: italic;
+  }
+
+  /* ---------- Reservas ---------- */
+  .reserve-wrap{
+    max-width: 640px;
+    margin: 0 auto;
+    border: 1px solid var(--line);
+    padding: clamp(2rem, 5vw, 3.5rem);
+    background: linear-gradient(160deg, rgba(201,163,92,.04), transparent 60%);
+  }
+
+  form{ display: grid; gap: 1.4rem; }
+  .form-row{ display: grid; gap: 1.4rem; }
+  @media (min-width: 560px){ .form-row.two{ grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 560px){ .form-row.three{ grid-template-columns: 1fr 1fr 1fr; } }
+
+  label{
+    display: block;
+    font-size: .7rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--cream-faint);
+    margin-bottom: .55rem;
+  }
+
+  input, select, textarea{
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    color: var(--cream);
+    font-family: "Jost", sans-serif;
+    font-size: .98rem;
+    padding: .5rem .1rem;
+    outline: none;
+    transition: border-color .25s ease;
+  }
+  input::placeholder, textarea::placeholder{ color: var(--cream-faint); }
+  input:focus, select:focus, textarea:focus{ border-color: var(--gold); }
+  select option{ background: var(--bg); color: var(--cream); }
+
+  textarea{ resize: vertical; min-height: 70px; }
+
+  form .btn{
+    width: 100%;
+    margin-top: .8rem;
+    border: 1px solid var(--gold);
+    background: var(--gold);
+    color: var(--bg-deep);
+    padding: 1rem;
+    font-size: .8rem;
+    cursor: pointer;
+  }
+  form .btn:hover{ background: var(--gold-soft); border-color: var(--gold-soft); }
+
+  .form-msg{
+    text-align: center;
+    font-size: .88rem;
+    padding-top: .4rem;
+    min-height: 1.4em;
+    color: var(--gold);
+  }
+
+  /* ---------- El Chef ---------- */
+  .chef-grid{
+    display: grid;
+    gap: 3.5rem;
+    align-items: center;
+  }
+  @media (min-width: 860px){
+    .chef-grid{ grid-template-columns: 1fr .9fr; gap: 5rem; }
+    .chef-grid .about-visual{ order: 2; }
+  }
+  .chef-quote{
+    margin-top: 1.6rem;
+    padding-left: 1.2rem;
+    border-left: 1px solid var(--gold);
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--cream);
+  }
+  .chef-name{
+    display: block;
+    margin-top: 1.6rem;
+    font-size: .78rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .chef-name span{ display: block; color: var(--cream-faint); font-size: .8rem; letter-spacing: .06em; text-transform: none; margin-top: .3rem; }
+
+  /* ---------- Eventos ---------- */
+  .events-grid{
+    display: grid;
+    gap: 1.6rem;
+  }
+  @media (min-width: 760px){ .events-grid{ grid-template-columns: repeat(3, 1fr); } }
+  .event-card{
+    border: 1px solid var(--line);
+    padding: 2.4rem 2rem;
+    text-align: center;
+    transition: border-color .3s ease, transform .3s ease;
+  }
+  .event-card:hover{ border-color: var(--gold); transform: translateY(-6px); }
+  .event-card .num{
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.6rem;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .event-card h3{ font-size: 1.3rem; margin-bottom: .8rem; }
+  .event-card p{ color: var(--cream-dim); font-size: .92rem; }
+
+  /* ---------- Testimonios ---------- */
+  .testi-wrap{
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    min-height: 220px;
+  }
+  .testi-slide{
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity .6s ease, transform .6s ease;
+    pointer-events: none;
+  }
+  .testi-slide.active{
+    position: relative;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .testi-stars{ color: var(--gold); letter-spacing: .3em; margin-bottom: 1.4rem; font-size: .9rem; }
+  .testi-slide p.quote{
+    font-family: "Cormorant Garamond", serif;
+    font-size: clamp(1.3rem, 3vw, 1.7rem);
+    font-style: italic;
+    color: var(--cream);
+    max-width: 58ch;
+    margin: 0 auto;
+  }
+  .testi-slide .author{
+    display: block;
+    margin-top: 1.6rem;
+    font-size: .74rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--cream-faint);
+  }
+  .testi-dots{
+    display: flex;
+    justify-content: center;
+    gap: .6rem;
+    margin-top: 2.6rem;
+  }
+  .testi-dots button{
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    border: none;
+    background: var(--cream-faint);
+    cursor: pointer;
+    padding: 0;
+  }
+  .testi-dots button.active{ background: var(--gold); }
+
+  /* ---------- Política de reservas / FAQ ---------- */
+  .faq-list{ max-width: 760px; margin: 0 auto; display: grid; gap: 1px; background: var(--line); }
+  .faq-item{ background: var(--bg); }
+  .faq-item summary{
+    list-style: none;
+    cursor: pointer;
+    padding: 1.5rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.18rem;
+    color: var(--cream);
+  }
+  .faq-item summary::-webkit-details-marker{ display: none; }
+  .faq-item summary .sign{
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    position: relative;
+  }
+  .faq-item summary .sign::before, .faq-item summary .sign::after{
+    content:"";
+    position: absolute;
+    background: var(--gold);
+    transition: transform .3s ease;
+  }
+  .faq-item summary .sign::before{ left: 0; top: 9px; width: 20px; height: 1px; }
+  .faq-item summary .sign::after{ left: 9px; top: 0; width: 1px; height: 20px; }
+  .faq-item[open] summary .sign::after{ transform: rotate(90deg); }
+  .faq-item p{
+    padding: 0 1.2rem 1.6rem;
+    color: var(--cream-dim);
+    font-size: .94rem;
+    max-width: 68ch;
+  }
+  .faq-note{
+    text-align: center;
+    margin-top: 2.6rem;
+    font-size: .88rem;
+    color: var(--cream-faint);
+  }
+
+  /* ---------- Comparte / QR ---------- */
+  .share-wrap{
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+    text-align: center;
+  }
+  @media (min-width: 760px){ .share-wrap{ grid-template-columns: auto 1fr; text-align: left; } }
+  .qr-box{
+    display: inline-flex;
+    padding: .9rem;
+    background: var(--cream);
+    border: 1px solid var(--line);
+    margin: 0 auto;
+  }
+  @media (min-width: 760px){ .qr-box{ margin: 0; } }
+  .qr-box img{ width: 148px; height: 148px; display: block; }
+
+  /* ---------- Footer ---------- */
+  footer{
+    background: var(--bg-deep);
+    padding: 4.5rem 0 2rem;
+    border-top: 1px solid var(--line);
+  }
+  .footer-grid{
+    display: grid;
+    gap: 2.6rem;
+    text-align: center;
+  }
+  @media (min-width: 760px){
+    .footer-grid{ grid-template-columns: repeat(4, 1fr); text-align: left; }
+  }
+  .footer-col h4{
+    font-family: "Cormorant Garamond", serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    margin-bottom: .9rem;
+    letter-spacing: .05em;
+  }
+  .footer-col p, .footer-col a{
+    color: var(--cream-dim);
+    font-size: .92rem;
+    display: block;
+  }
+  .footer-col a:hover{ color: var(--gold); }
+
+  .footer-newsletter{ display: flex; gap: 0; margin-top: .3rem; border-bottom: 1px solid var(--line); }
+  .footer-newsletter input{ border: none; padding: .5rem 0; }
+  .footer-newsletter button{
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-family: "Jost", sans-serif;
+    font-size: .78rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .footer-msg{ font-size: .8rem; color: var(--gold); margin-top: .5rem; min-height: 1.2em; }
+
+  .footer-social{ display: flex; gap: 1rem; margin-top: .3rem; justify-content: center; }
+  @media (min-width: 760px){ .footer-social{ justify-content: flex-start; } }
+  .footer-social a{
+    width: 34px; height: 34px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem;
+    color: var(--cream-dim);
+  }
+  .footer-social a:hover{ border-color: var(--gold); color: var(--gold); }
+
+  .footer-map{
+    margin-top: 4.5rem;
+    border: 1px solid var(--line);
+    filter: grayscale(.4) sepia(.25) brightness(.75) contrast(1.05);
+    height: 260px;
+  }
+  .footer-map iframe{ width: 100%; height: 100%; border: 0; display: block; }
+
+  .footer-bottom{
+    margin-top: 3.5rem;
+    padding-top: 1.8rem;
+    border-top: 1px solid var(--line);
+    text-align: center;
+    font-size: .76rem;
+    color: var(--cream-faint);
+    letter-spacing: .04em;
+  }
+
+  ::selection{ background: var(--gold); color: var(--bg-deep); }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<nav class="side-nav" aria-label="Navegación de secciones">
+  <div class="track">
+    <div class="line"></div>
+    <div class="line-fill" id="sideNavFill"></div>
+    <a href="#top" data-label="Inicio" data-section="top"></a>
+    <a href="#nosotros" data-label="El Local" data-section="nosotros"></a>
+    <a href="#galeria" data-label="Galería" data-section="galeria"></a>
+    <a href="#chef" data-label="El Chef" data-section="chef"></a>
+    <a href="#carta" data-label="La Carta" data-section="carta"></a>
+    <a href="#eventos" data-label="Eventos" data-section="eventos"></a>
+    <a href="#testimonios" data-label="Testimonios" data-section="testimonios"></a>
+    <a href="#reservas" data-label="Reservas" data-section="reservas"></a>
+    <a href="#politica" data-label="Cancelación" data-section="politica"></a>
+    <a href="#contacto" data-label="Contacto" data-section="contacto"></a>
+  </div>
+</nav>
+
+<header id="siteHeader">
+  <div class="container nav-row">
+    <a href="#top" class="brand">OLE<span>A</span></a>
+    <nav class="links">
+      <a href="#nosotros">El Local</a>
+      <a href="#galeria">Galería</a>
+      <a href="#carta">La Carta</a>
+      <a href="#eventos">Eventos</a>
+      <a href="#reservas">Reservas</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a href="#reservas" class="btn nav-cta">Reservar</a>
+    <a href="#reservas" class="menu-toggle">Reservar</a>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-bg" role="img" aria-label="Sala del restaurante OLEA, ambiente cálido y en penumbra"></div>
+  <p class="eyebrow">Cocina mediterránea · Desde el producto de temporada</p>
+  <h1>OLEA</h1>
+  <div class="hero-rule"></div>
+  <p>Un espacio sereno donde la tradición mediterránea se sirve con precisión contemporánea. Aceite, brasa y producto de mercado, en su forma más honesta.</p>
+  <div class="hero-actions">
+    <a href="#reservas" class="btn solid">Reservar mesa</a>
+    <a href="#carta" class="btn">Ver la carta del día</a>
+  </div>
+  <div class="scroll-hint">Descubra</div>
+</section>
+
+<section id="nosotros">
+  <div class="container about-grid fade-in">
+    <div class="about-visual"><div class="about-visual-inner">
+      <img src="https://images.unsplash.com/photo-1701723284923-18f236a6f134?auto=format&fit=crop&w=1200&q=80" alt="Sala interior del restaurante OLEA, mesas dispuestas con luz cálida" loading="lazy" />
+      <span class="visual-tag">OLEA</span>
+    </div></div>
+    <div class="about-text">
+      <p class="eyebrow">El Local</p>
+      <h2>Una mesa con vocación de origen</h2>
+      <p>OLEA nace de la voluntad de honrar el recetario mediterráneo sin artificios: producto de temporada, cocción justa y el aceite de oliva virgen extra como hilo conductor de cada plato. Nuestra sala, de líneas depuradas y luz cálida, invita a la conversación pausada y al disfrute sin prisa.</p>
+      <p>Tras los fogones, un equipo que trabaja a diario con mercados locales y pequeños productores, para que cada mesa reciba lo mejor de cada estación. Elegancia discreta, servicio atento y una carta que cambia con el calendario agrícola.</p>
+      <div class="stats">
+        <div><h3 data-count="12">0</h3><span>Años de trayectoria</span></div>
+        <div><h3 data-count="1">0</h3><span>Estrella Michelin</span></div>
+        <div><h3 data-count="28">0</h3><span>Mesas en sala</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="galeria">
+  <div class="container">
+    <div class="section-head fade-in">
+      <p class="eyebrow">Instantáneas</p>
+      <h2>Cocina y ambiente</h2>
+      <p>Un vistazo a la sala, la brasa y algunos de los platos que definen nuestra propuesta.</p>
+    </div>
+    <div class="gallery fade-in">
+      <figure>
+        <img src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1000&q=80" alt="Pescado a la brasa emplatado con salsa y vino tinto" loading="lazy" />
+        <figcaption>Lubina a la brasa</figcaption>
+      </figure>
+      <figure>
+        <img src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80" alt="Aceite de oliva virgen extra en vinagrera de cristal" loading="lazy" />
+        <figcaption>Aceite de oliva virgen extra</figcaption>
+      </figure>
+      <figure>
+        <img src="https://images.unsplash.com/photo-1672636401225-ec3d4025a4af?auto=format&fit=crop&w=800&q=80" alt="Almejas emplatadas junto a una copa de vino" loading="lazy" />
+        <figcaption>Marisco de temporada</figcaption>
+      </figure>
+      <figure>
+        <img src="https://images.unsplash.com/photo-1511690656952-34342bb7c2f2?auto=format&fit=crop&w=800&q=80" alt="Plato hondo negro con verduras y cuchara de plata" loading="lazy" />
+        <figcaption>Producto de mercado</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<section id="chef">
+  <div class="container chef-grid fade-in">
+    <div class="about-visual"><div class="about-visual-inner">
+      <img src="https://images.unsplash.com/photo-1761095596765-c8abe01d3aea?auto=format&fit=crop&w=1200&q=80" alt="Chef emplatando un plato con precisión en la cocina de OLEA" loading="lazy" />
+    </div></div>
+    <div class="about-text">
+      <p class="eyebrow">El Chef</p>
+      <h2>Una firma con raíces mediterráneas</h2>
+      <p>Formado entre cocinas de Madrid y la Provenza, nuestro chef ejecutivo defiende una cocina de gesto contenido: pocos elementos, técnica precisa y el máximo respeto por el producto de temporada. Cada plato se piensa como una síntesis del recetario mediterráneo, sin renunciar a la sorpresa.</p>
+      <p class="chef-quote">«Cocinar es, ante todo, un acto de honestidad hacia el ingrediente.»</p>
+      <span class="chef-name">Chef Ejecutivo<span>Restaurante OLEA</span></span>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="carta">
+  <div class="container">
+    <div class="section-head fade-in">
+      <p class="eyebrow">La Carta</p>
+      <h2>Menú del día</h2>
+      <p>Selección breve y cambiante, compuesta cada mañana según el mejor género disponible en el mercado.</p>
+    </div>
+
+    <div class="menu-tabs fade-in">
+      <button class="menu-tab active" data-tab="entrantes">Entrantes</button>
+      <button class="menu-tab" data-tab="principales">Principales</button>
+      <button class="menu-tab" data-tab="postres">Postres</button>
+    </div>
+
+    <div class="menu-panel active" id="entrantes">
+      <div class="menu-list">
+        <div class="menu-item">
+          <div><div class="menu-item-name">Carpaccio de gamba roja</div><div class="menu-item-desc">Aceite de oliva arbequina, cítricos y flor de sal</div></div>
+          <div class="menu-dots"></div>
+          <div class="menu-item-price">18 €</div>
+        </div>
+        <div class="menu-item">
+          <div><div class="menu-item-name">Alcachofas confitadas</div><div class="menu-item-desc">Con jamón ibérico de bellota y virutas de parmesano</div></div>
+          <div class="menu-dots"></div>
+          <div class="menu-item-price">16 €</div>
+        </div>
+        <div class="menu-item">
+          <div><div class="menu-item-name">Tartar de tomate de temporada</div><div class="menu-item-desc">Burrata cremosa, albahaca y pan de cristal tostado</div></div>
+          <div class="menu-dots"></div>
+          <div class="menu-item-price">15 €</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="principales">
+      <div class="menu-list">
+        <div class="menu-item">
+          <div><div class="menu-item-name">Lubina a la brasa</div><div class="menu-item-desc">Sofrito de pimientos, aceitunas negras y jugo de asado</div></div>
+          <div class="menu-dots"></div>
+          <div class="menu-item-price">27 €</div>
+        </div>
+        <div class="menu-item">
+          <div><div class="menu-item-name">Arroz de setas y trufa</div><div class="menu-item-desc">Caldo de ave, romero y aceite de trufa de temporada</div></div>
+          <div class="menu-dots"></div>
+          <div class="menu-item-price">24 €</div>
+        </div>
+        <div class="menu-item">
+          <div><div class="menu-item-name">Carrillera de ternera</div><div class="menu-item-desc">Cocción lenta al vino tinto, puré de raíces y crujiente de piel</div></div>
+          <div class="menu-dots"></div>
+          <div class="menu-item-price">26 €</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="postres">
+      <div class="menu-list">
+        <div class="menu-item">
+          <div><div class="menu-item-name">Torrija caramelizada</div><div class="menu-item-desc">Helado de vainilla de Madagascar y aceite de oliva dulce</div></div>
+          <div class="menu-dots"></div>
+          <div class="menu-item-price">9 €</div>
+        </div>
+        <div class="menu-item">
+          <div><div class="menu-item-name">Tarta fina de manzana</div><div class="menu-item-desc">Caramelo salado y sorbete de sidra</div></div>
+          <div class="menu-dots"></div>
+          <div class="menu-item-price">9 €</div>
+        </div>
+        <div class="menu-item">
+          <div><div class="menu-item-name">Cítricos de temporada</div><div class="menu-item-desc">Sopa fría de naranja, romero y aceite de oliva</div></div>
+          <div class="menu-dots"></div>
+          <div class="menu-item-price">8 €</div>
+        </div>
+      </div>
+    </div>
+
+    <p class="menu-note fade-in">Menú sujeto a disponibilidad de mercado · Precios en euros, IVA incluido · Consulte alérgenos con nuestro equipo de sala</p>
+  </div>
+</section>
+
+<section id="eventos">
+  <div class="container">
+    <div class="section-head fade-in">
+      <p class="eyebrow">Eventos Privados</p>
+      <h2>Celebraciones a su medida</h2>
+      <p>Disponemos de un reservado y de la sala completa para ocasiones que merecen un entorno singular, con menús diseñados junto a nuestro chef.</p>
+    </div>
+    <div class="events-grid fade-in">
+      <div class="event-card">
+        <div class="num">I.</div>
+        <h3>Comidas y cenas privadas</h3>
+        <p>Reservado con capacidad para hasta 16 comensales, ideal para celebraciones familiares y cenas de empresa.</p>
+      </div>
+      <div class="event-card">
+        <div class="num">II.</div>
+        <h3>Eventos corporativos</h3>
+        <p>Sala completa para presentaciones, catas dirigidas y encuentros de trabajo con servicio exclusivo.</p>
+      </div>
+      <div class="event-card">
+        <div class="num">III.</div>
+        <h3>Menús de celebración</h3>
+        <p>Propuestas gastronómicas diseñadas a medida para bodas, aniversarios y ocasiones especiales.</p>
+      </div>
+    </div>
+    <div class="hero-actions fade-in" style="margin-top:3rem;">
+      <a href="mailto:eventos@olea-restaurante.com" class="btn">Consultar disponibilidad</a>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="testimonios">
+  <div class="container">
+    <div class="section-head fade-in">
+      <p class="eyebrow">Testimonios</p>
+      <h2>La experiencia de nuestros comensales</h2>
+    </div>
+    <div class="testi-wrap fade-in" id="testiWrap">
+      <div class="testi-slide active">
+        <div class="testi-stars">★★★★★</div>
+        <p class="quote">«Una cocina honesta y precisa, en una sala que invita a quedarse. El aceite de oliva de OLEA es, por sí solo, motivo de vuelta.»</p>
+        <span class="author">Marta S. · Cliente habitual</span>
+      </div>
+      <div class="testi-slide">
+        <div class="testi-stars">★★★★★</div>
+        <p class="quote">«El servicio, discreto y atento, está a la altura de una carta que cambia con las estaciones sin perder nunca su identidad.»</p>
+        <span class="author">Javier R. · Guía gastronómica local</span>
+      </div>
+      <div class="testi-slide">
+        <div class="testi-stars">★★★★★</div>
+        <p class="quote">«Celebramos allí un aniversario y el equipo cuidó cada detalle. Una dirección obligada para quien busca elegancia sin artificio.»</p>
+        <span class="author">Elena y Pablo · Clientes desde 2019</span>
+      </div>
+    </div>
+    <div class="testi-dots" id="testiDots"></div>
+  </div>
+</section>
+
+<section id="reservas">
+  <div class="container">
+    <div class="section-head fade-in">
+      <p class="eyebrow">Reservas</p>
+      <h2>Reserve su mesa</h2>
+      <p>Le rogamos confirme su asistencia con antelación. Nuestro equipo confirmará la disponibilidad a la mayor brevedad.</p>
+    </div>
+
+    <div class="reserve-wrap fade-in">
+      <form id="reserveForm">
+        <div class="form-row two">
+          <div>
+            <label for="nombre">Nombre y apellidos</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Su nombre completo" required />
+          </div>
+          <div>
+            <label for="telefono">Teléfono</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="+34 600 000 000" required />
+          </div>
+        </div>
+
+        <div>
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" name="email" placeholder="nombre@correo.com" required />
+        </div>
+
+        <div class="form-row three">
+          <div>
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha" name="fecha" required />
+          </div>
+          <div>
+            <label for="hora">Hora</label>
+            <select id="hora" name="hora" required>
+              <option value="" disabled selected>Elegir</option>
+              <option>13:00</option><option>13:30</option><option>14:00</option>
+              <option>14:30</option><option>20:00</option><option>20:30</option>
+              <option>21:00</option><option>21:30</option>
+            </select>
+          </div>
+          <div>
+            <label for="comensales">Comensales</label>
+            <select id="comensales" name="comensales" required>
+              <option value="" disabled selected>Elegir</option>
+              <option>1 persona</option><option>2 personas</option><option>3 personas</option>
+              <option>4 personas</option><option>5 personas</option><option>6+ personas</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="notas">Peticiones especiales</label>
+          <textarea id="notas" name="notas" placeholder="Alergias, celebraciones u otras preferencias (opcional)"></textarea>
+        </div>
+
+        <button type="submit" class="btn">Confirmar solicitud de reserva</button>
+        <p class="form-msg" id="formMsg"></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="alt" id="politica">
+  <div class="container">
+    <div class="section-head fade-in">
+      <p class="eyebrow">Política de Reservas</p>
+      <h2>Cancelación y modificación</h2>
+      <p>Rogamos su comprensión: una mesa reservada es una mesa que dejamos de ofrecer a otros comensales. Estas son nuestras condiciones.</p>
+    </div>
+    <div class="faq-list fade-in">
+      <details class="faq-item" open>
+        <summary>¿Cómo puedo cancelar o modificar mi reserva?<span class="sign"></span></summary>
+        <p>Puede cancelar o modificar su reserva respondiendo al correo de confirmación, llamando al +34 91 000 00 00 o escribiendo a reservas@olea-restaurante.com, indicando su nombre y la fecha reservada.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Hasta cuándo puedo cancelar sin coste?<span class="sign"></span></summary>
+        <p>La cancelación es gratuita hasta 24 horas antes de la hora reservada. Pasado ese plazo, o en caso de no presentarse (no-show), podrá aplicarse un cargo de cortesía de 15 € por comensal.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Y para grupos de más de 8 personas o el reservado privado?<span class="sign"></span></summary>
+        <p>Las reservas de grupo y los eventos privados requieren confirmación con 72 horas de antelación y un depósito reembolsable, que se descuenta del importe final de la cuenta.</p>
+      </details>
+      <details class="faq-item">
+        <summary>¿Guardan la mesa si llego tarde?<span class="sign"></span></summary>
+        <p>Mantenemos su mesa reservada durante 15 minutos de cortesía. Si prevé un retraso mayor, le agradecemos nos avise para poder conservarla.</p>
+      </details>
+    </div>
+    <p class="faq-note fade-in">Para cualquier otra consulta sobre su reserva, nuestro equipo de sala estará encantado de atenderle.</p>
+  </div>
+</section>
+
+<section id="compartir">
+  <div class="container share-wrap fade-in">
+    <div class="qr-box">
+      <img src="assets/qr-code.png" alt="Código QR de acceso a la página web de OLEA Restaurante" loading="lazy" />
+    </div>
+    <div>
+      <p class="eyebrow">Lleve OLEA consigo</p>
+      <h2>Escanee y visítenos en línea</h2>
+      <p style="color:var(--cream-dim); max-width:52ch;">Comparta este código en su mesa, invitaciones o tarjetas de visita para que cualquiera pueda acceder a nuestra carta y reservar en segundos.</p>
+    </div>
+  </div>
+</section>
+
+<footer id="contacto">
+  <div class="container footer-grid">
+    <div class="footer-col">
+      <h4>OLEA</h4>
+      <p>Calle de la Almazara, 14</p>
+      <p>28004 Madrid, España</p>
+    </div>
+    <div class="footer-col">
+      <h4>Horario</h4>
+      <p>Martes a domingo</p>
+      <p>13:00–16:00 · 20:00–23:30</p>
+      <p>Lunes cerrado</p>
+    </div>
+    <div class="footer-col">
+      <h4>Contacto</h4>
+      <a href="tel:+34910000000">+34 91 000 00 00</a>
+      <a href="mailto:reservas@olea-restaurante.com">reservas@olea-restaurante.com</a>
+    </div>
+    <div class="footer-col">
+      <h4>Síguenos</h4>
+      <div class="footer-social">
+        <a href="#" aria-label="Instagram" target="_blank" rel="noopener">IG</a>
+        <a href="#" aria-label="Facebook" target="_blank" rel="noopener">FB</a>
+        <a href="#" aria-label="TripAdvisor" target="_blank" rel="noopener">TA</a>
+      </div>
+      <p style="margin-top:1.4rem;">Boletín de novedades</p>
+      <form class="footer-newsletter" id="newsletterForm">
+        <label for="newsletterEmail" style="position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);">Correo electrónico</label>
+        <input type="email" id="newsletterEmail" placeholder="Su correo" required />
+        <button type="submit">Unirse</button>
+      </form>
+      <p class="footer-msg" id="newsletterMsg"></p>
+    </div>
+  </div>
+
+  <div class="container footer-map">
+    <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=-3.7138%2C40.4118%2C-3.6938%2C40.4218&amp;layer=mapnik&amp;marker=40.4168%2C-3.7038" title="Ubicación de OLEA Restaurante en el mapa" loading="lazy"></iframe>
+  </div>
+
+  <div class="container footer-bottom">
+    © 2026 OLEA Restaurante. Todos los derechos reservados.
+  </div>
+</footer>
+
+<script>
+  // Header background on scroll
+  const header = document.getElementById('siteHeader');
+  window.addEventListener('scroll', () => {
+    header.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Fade-in on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Scroll progress bar + parallax hero — el "hilo" que une todos los apartados
+  const progressBar = document.getElementById('progressBar');
+  const heroBg = document.querySelector('.hero-bg');
+  window.addEventListener('scroll', () => {
+    const scrollY = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    progressBar.style.width = (docHeight > 0 ? (scrollY / docHeight) * 100 : 0) + '%';
+    if (heroBg) heroBg.style.transform = `translateY(${scrollY * 0.25}px)`;
+  }, { passive: true });
+
+  // Side navigation: resalta el apartado visible y rellena la línea que los conecta
+  const sideDots = document.querySelectorAll('.side-nav a');
+  const sideFill = document.getElementById('sideNavFill');
+  const trackedSections = Array.from(sideDots)
+    .map(a => document.getElementById(a.dataset.section))
+    .filter(Boolean);
+
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const id = entry.target.id;
+      sideDots.forEach(dot => dot.classList.toggle('active', dot.dataset.section === id));
+      const idx = trackedSections.findIndex(s => s.id === id);
+      if (idx > -1 && sideFill) {
+        sideFill.style.height = (idx / (trackedSections.length - 1)) * 100 + '%';
+      }
+    });
+  }, { rootMargin: '-45% 0px -45% 0px', threshold: 0 });
+  trackedSections.forEach(s => sectionObserver.observe(s));
+
+  // Contador animado de cifras (años, estrellas, mesas)
+  const countObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.count, 10);
+      const duration = 1200;
+      const start = performance.now();
+      function tick(now){
+        const progress = Math.min((now - start) / duration, 1);
+        el.textContent = Math.round(progress * target);
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      countObserver.unobserve(el);
+    });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('[data-count]').forEach(el => countObserver.observe(el));
+
+  // Carrusel de testimonios
+  const testiSlides = document.querySelectorAll('.testi-slide');
+  const testiDotsWrap = document.getElementById('testiDots');
+  let testiIndex = 0;
+  testiSlides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    if (i === 0) dot.classList.add('active');
+    dot.setAttribute('aria-label', `Testimonio ${i + 1}`);
+    dot.addEventListener('click', () => showTesti(i));
+    testiDotsWrap.appendChild(dot);
+  });
+  function showTesti(i){
+    testiSlides[testiIndex].classList.remove('active');
+    testiDotsWrap.children[testiIndex].classList.remove('active');
+    testiIndex = i;
+    testiSlides[testiIndex].classList.add('active');
+    testiDotsWrap.children[testiIndex].classList.add('active');
+  }
+  setInterval(() => showTesti((testiIndex + 1) % testiSlides.length), 6000);
+
+  // Newsletter (demo, sin backend)
+  const newsletterForm = document.getElementById('newsletterForm');
+  const newsletterMsg = document.getElementById('newsletterMsg');
+  newsletterForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    newsletterMsg.textContent = 'Gracias por suscribirse a nuestras novedades.';
+    newsletterForm.reset();
+  });
+
+  // Menu tabs
+  const tabs = document.querySelectorAll('.menu-tab');
+  const panels = document.querySelectorAll('.menu-panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Reservation form (demo only, no backend)
+  const form = document.getElementById('reserveForm');
+  const msg = document.getElementById('formMsg');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const nombre = document.getElementById('nombre').value.trim();
+    msg.textContent = `Gracias, ${nombre.split(' ')[0] || ''}. Su solicitud ha sido recibida; le confirmaremos por correo a la mayor brevedad.`;
+    form.reset();
+  });
+
+  // Minimum reservation date = today
+  document.getElementById('fecha').min = new Date().toISOString().split('T')[0];
+</script>
+
+</body>
+</html>
